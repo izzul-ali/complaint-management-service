@@ -1,0 +1,121 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Role {
+  role_id    String    @id @default(uuid())
+  role_name  String    @db.VarChar(50)
+  created_at DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at DateTime? @db.Timestamptz(6)
+  deleted_by String?
+  deleted_at DateTime? @db.Timestamptz(6)
+
+  users User[]
+}
+
+model User {
+  user_id      String    @id @default(uuid())
+  email        String    @db.VarChar(100)
+  phone_number String?   @db.VarChar(25)
+  name         String    @db.VarChar(100)
+  password     String    @db.VarChar(30)
+  role_id      String
+  created_at   DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at   DateTime? @db.Timestamptz(6)
+  deleted_by   String?
+  deleted_at   DateTime? @db.Timestamptz(6)
+
+  role         Role        @relation(fields: [role_id], references: [role_id])
+  complaints   Complaint[] @relation("ComplaintClient")
+  schedules    Schedule[]  @relation("ScheduleTechnician")
+  assignments  Schedule[]  @relation("ScheduleAdmin")
+  reports      Report[]    @relation("ReportTechnician")
+  sentMessages Message[]   @relation("MessageSender")
+}
+
+model Complaint {
+  complaint_id  String    @id @default(uuid())
+  client_id     String
+  description   String    @db.Text
+  date_received DateTime  @default(now()) @db.Timestamptz(6)
+  status        String    @db.VarChar(50)
+  category      String    @db.VarChar(50)
+  created_at    DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at    DateTime? @db.Timestamptz(6)
+  deleted_by    String?
+  deleted_at    DateTime? @db.Timestamptz(6)
+
+  client    User       @relation("ComplaintClient", fields: [client_id], references: [user_id])
+  schedules Schedule[]
+  reports   Report[]
+  chatRooms ChatRoom[]
+}
+
+model Schedule {
+  schedule_id         String    @id @default(uuid())
+  complaint_id        String
+  technician_id       String
+  assigned_by         String
+  date_time_scheduled DateTime  @db.Timestamptz(6)
+  created_at          DateTime? @default(now()) @db.Timestamptz(6)
+  deleted_by          String?
+  deleted_at          DateTime? @db.Timestamptz(6)
+
+  complaint  Complaint @relation(fields: [complaint_id], references: [complaint_id])
+  technician User      @relation("ScheduleTechnician", fields: [technician_id], references: [user_id])
+  admin      User      @relation("ScheduleAdmin", fields: [assigned_by], references: [user_id])
+}
+
+model Report {
+  report_id     String    @id @default(uuid())
+  complaint_id  String
+  technician_id String
+  status_update String    @db.VarChar(50)
+  notes         String    @db.Text
+  created_at    DateTime? @default(now()) @db.Timestamptz(6)
+  updated_by    String?
+  updated_at    DateTime? @db.Timestamptz(6)
+  deleted_by    String?
+  deleted_at    DateTime? @db.Timestamptz(6)
+
+  complaint  Complaint @relation(fields: [complaint_id], references: [complaint_id])
+  technician User      @relation("ReportTechnician", fields: [technician_id], references: [user_id])
+}
+
+model ChatRoom {
+  chatroom_id  String    @id @default(uuid())
+  complaint_id String
+  created_at   DateTime  @default(now()) @db.Timestamptz(6)
+  deleted_by   String?
+  deleted_at   DateTime? @db.Timestamptz(6)
+
+  complaint Complaint @relation(fields: [complaint_id], references: [complaint_id])
+  messages  Message[]
+}
+
+model Message {
+  message_id  String    @id @default(uuid())
+  chatroom_id String
+  sender_id   String
+  content     String    @db.Text
+  type        String    @db.VarChar(10)
+  sent_at     DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at  DateTime? @db.Timestamptz(6)
+  deleted_by  String?
+  deleted_at  DateTime? @db.Timestamptz(6)
+
+  chatRoom ChatRoom @relation(fields: [chatroom_id], references: [chatroom_id])
+  sender   User     @relation("MessageSender", fields: [sender_id], references: [user_id])
+}
