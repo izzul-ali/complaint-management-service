@@ -1,6 +1,8 @@
-import { IAuthResponse, ILoginDTO } from "@/interfaces/auth"
-import { IGlobalResponse } from "@/interfaces/global/response.interface"
-import { prisma } from "@/prisma/prisma.client"
+import { IAuthResponse, ILoginDTO } from "../../interfaces/auth"
+import { IGlobalResponse } from "../../interfaces/global/index.interface"
+import { prisma } from "../../prisma/prisma.client"
+import { handleError } from "../../utils/helper/error"
+import { generateJwtToken } from "../../utils/helper/jwt"
 
 export async function SLogin(
   body: ILoginDTO
@@ -20,7 +22,19 @@ export async function SLogin(
           role: true,
         },
       })
-      .catch()
+      .catch(() => {
+        throw handleError({
+          status: 404,
+          message: "Invalid email or password",
+        })
+      })
+
+    const token = generateJwtToken(
+      user.user_id,
+      user.name,
+      user.email,
+      user.phone_number
+    )
 
     const result: IAuthResponse = {
       user_id: user.user_id,
@@ -28,16 +42,12 @@ export async function SLogin(
       phone_number: user.phone_number,
       name: user.name,
       role_id: user.role_id,
+      role_name: user.role.role_name,
+      address: user.address,
+      category: user.category,
       created_at: user.created_at.toString(),
       updated_at: user.updated_at ? user.updated_at.toString() : null,
-      role: {
-        role_id: user.role.role_id,
-        role_name: user.role.role_name,
-        created_at: user.role.created_at.toString(),
-        updated_at: user.role.updated_at
-          ? user.role.updated_at.toString()
-          : null,
-      },
+      token,
     }
 
     return {
@@ -45,7 +55,7 @@ export async function SLogin(
       message: "Success",
       data: result,
     }
-  } catch (error) {
-    throw error
+  } catch (err: any) {
+    throw handleError(err)
   }
 }

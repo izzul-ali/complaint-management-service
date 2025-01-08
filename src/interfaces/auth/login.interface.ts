@@ -1,4 +1,3 @@
-import { IRole } from "../role"
 import { IUser } from "../user"
 
 export interface ILoginDTO {
@@ -7,5 +6,6 @@ export interface ILoginDTO {
 }
 
 export interface IAuthResponse extends IUser {
-  role: IRole
+  role_name: string
+  token: string
 }
