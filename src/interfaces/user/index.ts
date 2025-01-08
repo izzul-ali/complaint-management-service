@@ -1,3 +1,4 @@
-import { IUser } from "./user.interface"
+import { IFindUserParams, IUser } from "./find.interface"
+import { ICreateUser, IUpdateUser } from "./mutation.interface"
 
-export { IUser }
+export { IUser, IFindUserParams, IUpdateUser, ICreateUser }
