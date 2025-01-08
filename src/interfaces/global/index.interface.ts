@@ -1,7 +1,13 @@
+export interface IGlobalParams {
+  search?: string
+  page?: number
+  limit?: number
+}
+
 export interface IGlobalResponse<T> {
   status: number
   message: string
-  data: T
+  data?: T
   pagination?: IPaginationResponse
 }
 
