@@ -13,6 +13,7 @@ export interface IUser {
   address: string | null
   category: string | null
   role_name: string
+  password: string
   created_at: string
   updated_at: string | null
 }

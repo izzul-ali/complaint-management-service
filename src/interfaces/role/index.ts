@@ -1,3 +1,3 @@
-import { IRole } from "./role.interface"
+import { IFindRoleResponse } from "./find.interface"
 
-export { IRole }
+export { IFindRoleResponse }
