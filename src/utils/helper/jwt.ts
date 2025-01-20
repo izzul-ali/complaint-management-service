@@ -1,4 +1,6 @@
 import jwt, { JwtPayload } from "jsonwebtoken"
+import { prisma } from "../../prisma/prisma.client"
+import { User } from "@prisma/client"
 
 interface IJwtPayload extends JwtPayload {
   id: string
@@ -31,12 +33,18 @@ export const generateJwtToken = (
   )
 }
 
-export const validateJwtToken = (token: string) => {
+export const validateJwtToken = async (token: string): Promise<User | null> => {
   const isMatch = jwt.verify(token, process.env.JWT_SECRET as string, {
     algorithms: ["HS256"],
   }) as IJwtPayload
 
-  if (!isMatch.email && !isMatch.phoneNumber) {
-    throw new Error("Invalid Token")
+  if ((!isMatch.email && !isMatch.phoneNumber) || !isMatch.id) {
+    return null
   }
+
+  const user = await prisma.user.findFirst({
+    where: { user_id: isMatch.id },
+  })
+
+  return user
 }

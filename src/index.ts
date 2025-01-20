@@ -10,39 +10,8 @@ const port = process.env.PORT || 8080
 
 app.disable("x-powered-by")
 
-// app.use(
-//   pino(
-//     {
-//       level: "info",
-//       customLevels: {
-//         error: 50,
-//         info: 20,
-//         debug: 10,
-//       },
-//       useOnlyCustomLevels: true,
-//       formatters: {
-//         level: (label) => {
-//           return { level: label }
-//         },
-//       },
-//       transport: {
-//         target: "pino-pretty",
-//         options: {
-//           colorize: true,
-//           translateTime: "SYS:yyyy-mm-dd hh:MM:ss",
-//           ignore: "pid",
-//         },
-//       },
-//     }
-//     // pinoms.multistream(streams, {
-//     //   levels,
-//     //   dedupe: true,
-//     // })
-//   )
-// )
-
 app.use(express.json())
-app.use(express.urlencoded())
+app.use(express.urlencoded({ extended: true }))
 
 app.use(cors({ origin: "*" }))
 

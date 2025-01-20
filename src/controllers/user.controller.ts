@@ -32,7 +32,10 @@ export const CCreateUser = async (
   try {
     const body = req.body as ICreateUser
 
-    const result = await SCreateUser(body)
+    // @ts-ignore
+    const user = req.user
+
+    const result = await SCreateUser(user!.user_id, body)
 
     res.status(200).json(result)
   } catch (error: any) {
@@ -48,7 +51,10 @@ export const CUpdateUser = async (
   try {
     const body = req.body as IUpdateUser
 
-    const result = await SUpdateUser(body)
+    // @ts-ignore
+    const user = req.user
+
+    const result = await SUpdateUser(user!.user_id, body)
 
     res.status(200).json(result)
   } catch (error: any) {
@@ -64,7 +70,10 @@ export const CDeleteUser = async (
   try {
     const body = req.params as { id: string }
 
-    const result = await SDeleteUser(body.id)
+    // @ts-ignore
+    const user = req.user
+
+    const result = await SDeleteUser(user!.user_id, body.id)
 
     res.status(200).json(result)
   } catch (error: any) {

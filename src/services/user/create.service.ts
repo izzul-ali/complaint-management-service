@@ -4,6 +4,7 @@ import { prisma } from "../../prisma/prisma.client"
 import { handleError } from "../../utils/helper/error"
 
 export async function SCreateUser(
+  created_by: string,
   body: ICreateUser
 ): Promise<IGlobalResponse<any>> {
   try {
@@ -17,14 +18,12 @@ export async function SCreateUser(
           role_id: body.role_id,
           address: body.address,
           category: body.category,
+          created_by,
           updated_at: new Date(),
         },
       })
-      .catch(() => {
-        throw handleError({
-          status: 500,
-          message: "Something went wrong!",
-        })
+      .catch((err) => {
+        throw handleError(err)
       })
 
     return {

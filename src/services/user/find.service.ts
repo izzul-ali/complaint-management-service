@@ -35,11 +35,8 @@ export async function SFindUsers(
           },
         }),
       ])
-      .catch(() => {
-        throw handleError({
-          status: 404,
-          message: "Invalid email or password",
-        })
+      .catch((err) => {
+        throw handleError(err)
       })
 
     const result: IUser[] = users.map((user) => ({
@@ -50,6 +47,7 @@ export async function SFindUsers(
       role_id: user.role_id,
       role_name: user.role.role_name,
       address: user.address,
+      password: user.password,
       category: user.category,
       created_at: user.created_at.toString(),
       updated_at: user.updated_at ? user.updated_at.toString() : null,

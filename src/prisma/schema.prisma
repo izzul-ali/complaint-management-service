@@ -34,58 +34,49 @@ model User {
   role_id      String
   address      String?   @db.Text
   category     String?   @db.VarChar(50)
+  created_by   String?
   created_at   DateTime  @default(now()) @db.Timestamptz(6)
+  updated_by   String?
   updated_at   DateTime? @db.Timestamptz(6)
   deleted_by   String?
   deleted_at   DateTime? @db.Timestamptz(6)
 
-  role         Role        @relation(fields: [role_id], references: [role_id])
-  complaints   Complaint[] @relation("ComplaintClient")
-  schedules    Schedule[]  @relation("ScheduleTechnician")
-  assignments  Schedule[]  @relation("ScheduleAdmin")
-  reports      Report[]    @relation("ReportTechnician")
-  sentMessages Message[]   @relation("MessageSender")
+  role            Role        @relation(fields: [role_id], references: [role_id])
+  complaints      Complaint[] @relation("ComplaintClient")
+  schedules       Schedule[]  @relation("ScheduleTechnician")
+  assignments     Schedule[]  @relation("ScheduleAdmin")
+  reports_created Report[]    @relation("ReportTechnicianCreated")
+  reports_updated Report[]    @relation("ReportTechnicianUpdated")
+  sentMessages    Message[]   @relation("MessageSender")
 }
 
 model Complaint {
-  complaint_id  String    @id @default(uuid())
-  client_id     String
-  description   String    @db.Text
-  date_received DateTime  @default(now()) @db.Timestamptz(6)
-  status        String    @db.VarChar(50)
-  category      String    @db.VarChar(50)
-  created_at    DateTime  @default(now()) @db.Timestamptz(6)
-  updated_at    DateTime? @db.Timestamptz(6)
-  deleted_by    String?
-  deleted_at    DateTime? @db.Timestamptz(6)
+  complaint_id String    @id @default(uuid())
+  client_id    String
+  title        String    @db.VarChar(255)
+  description  String?   @db.Text
+  status       String    @db.VarChar(50)
+  category     String    @db.VarChar(50)
+  created_by   String?
+  created_at   DateTime  @default(now()) @db.Timestamptz(6)
+  updated_by   String?
+  updated_at   DateTime? @db.Timestamptz(6)
+  deleted_by   String?
+  deleted_at   DateTime? @db.Timestamptz(6)
 
   client    User       @relation("ComplaintClient", fields: [client_id], references: [user_id])
   schedules Schedule[]
-  reports   Report[]
+  reports   Report?
   chatRooms ChatRoom[]
 }
 
 model Schedule {
-  schedule_id         String    @id @default(uuid())
-  complaint_id        String
-  technician_id       String
-  assigned_by         String
-  date_time_scheduled DateTime  @db.Timestamptz(6)
-  created_at          DateTime? @default(now()) @db.Timestamptz(6)
-  deleted_by          String?
-  deleted_at          DateTime? @db.Timestamptz(6)
-
-  complaint  Complaint @relation(fields: [complaint_id], references: [complaint_id])
-  technician User      @relation("ScheduleTechnician", fields: [technician_id], references: [user_id])
-  admin      User      @relation("ScheduleAdmin", fields: [assigned_by], references: [user_id])
-}
-
-model Report {
-  report_id     String    @id @default(uuid())
+  schedule_id   String    @id @default(uuid())
   complaint_id  String
   technician_id String
-  status_update String    @db.VarChar(50)
-  notes         String    @db.Text
+  assigned_by   String
+  start_date    DateTime? @db.Timestamptz(6)
+  end_date      DateTime? @db.Timestamptz(6)
   created_at    DateTime? @default(now()) @db.Timestamptz(6)
   updated_by    String?
   updated_at    DateTime? @db.Timestamptz(6)
@@ -93,7 +84,29 @@ model Report {
   deleted_at    DateTime? @db.Timestamptz(6)
 
   complaint  Complaint @relation(fields: [complaint_id], references: [complaint_id])
-  technician User      @relation("ReportTechnician", fields: [technician_id], references: [user_id])
+  technician User      @relation("ScheduleTechnician", fields: [technician_id], references: [user_id])
+  admin      User      @relation("ScheduleAdmin", fields: [assigned_by], references: [user_id])
+  report     Report?
+}
+
+model Report {
+  report_id     String    @id @default(uuid())
+  complaint_id  String    @unique
+  schedule_id   String    @unique
+  status_update String    @db.VarChar(50)
+  file          String?   @db.Text
+  notes         String    @db.Text
+  created_by    String
+  created_at    DateTime? @default(now()) @db.Timestamptz(6)
+  updated_by    String?
+  updated_at    DateTime? @db.Timestamptz(6)
+  deleted_by    String?
+  deleted_at    DateTime? @db.Timestamptz(6)
+
+  complaint          Complaint @relation(fields: [complaint_id], references: [complaint_id])
+  technician_created User      @relation("ReportTechnicianCreated", fields: [created_by], references: [user_id])
+  technician_updated User?     @relation("ReportTechnicianUpdated", fields: [updated_by], references: [user_id])
+  schedule           Schedule  @relation(fields: [schedule_id], references: [schedule_id])
 }
 
 model ChatRoom {
